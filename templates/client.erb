@@ -1,0 +1,27 @@
+# File managed by Puppet
+
+<%
+def param_bacula(nom, valeur)
+  if valeur != "" then
+    return nom + " =\t\t\t" + valeur.to_s + "\n"
+  else
+    return ""
+  end
+end
+
+parametres = "Name,Address,FD Port,Catalog,Password,File Retention,Job Retention,AutoPrune,Maximum Concurrent Jobs,Priority"
+%>
+
+
+Client {
+<% for parametre in parametres.split(',') do
+   parametre = parametre.strip
+   valeur = binding.eval(parametre.downcase.gsub(' ', '_'))
+-%>
+   <%= param_bacula(parametre, valeur) -%>
+<%
+end
+-%>
+}
+
+

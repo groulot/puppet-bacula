@@ -1,0 +1,26 @@
+# File managed by Puppet
+
+<%
+def param_bacula(nom, valeur)
+  if valeur != "" then
+    return nom + "= \t\t\t" + valeur.to_s + "\n"
+  else
+    return ""
+  end
+end
+
+parametres = "Name,Archive Device,Device Type,Media Type,Autochanger,Changer Device,Changer Command,Alert Command,Drive Index,Autoselect,Maximum Changer Wait,Maximum Rewind Wait,Maximum Open Wait,Always Open,Volume Poll Interval,Close on Poll,Maximum Open Wait,Removable media,Random access,Requires Mount,Mount Point,Mount Command,Unmount Command,Minimum block size,Maximum block size,Hardware End of Medium,Fast Forward Space File,Use MTIOCGET,BSF at EOM,TWO EOF,Backward Space Record,Backward Space File,Forward Space Record,Forward Space File,Offline On Unmount,Maximum Concurrent Jobs,Maximum Volume Size,Maximum File Size,Block Positioning,Maximum Network Buffer Size,Maximum Spool Size,Maximum Job Spool Size,Spool Directory,Maximum Part Size,LabelMedia,AutomaticMount"
+%>
+
+Device {
+<% for parametre in parametres.split(',') do
+   parametre = parametre.strip
+   valeur = binding.eval(parametre.downcase.gsub(' ', '_'))
+-%>
+   <%= param_bacula(parametre, valeur) -%>
+<%
+end
+-%>
+}
+
+

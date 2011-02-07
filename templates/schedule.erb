@@ -1,0 +1,10 @@
+# File managed by Puppet
+
+Schedule {
+  Name = "<%= name %>"
+  <% for r in run do -%>
+  Run = <%= r %>
+  <% end -%>
+}
+
+

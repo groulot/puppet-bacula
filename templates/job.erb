@@ -1,0 +1,45 @@
+# File managed by Puppet
+
+<%
+def param_bacula(nom, valeur)
+  if valeur != "" then
+    return nom + "= \t\t\t" + valeur.to_s + "\n"
+  else
+    return ""
+  end
+end
+
+parametres = "Name,Enabled,Level,Accurate,Verify Job,JobDefs,Bootstrap,Write Bootstrap,Client,FileSet,Messages,Pool,Full Backup Pool,Differential Backup Pool,Incremental Backup Pool,Storage,Max Start Delay,Max Run Time,Incremental Max Run Time,Differential Max Wait Time,Max Run Shed Time,Max Wait Time,Max Full Age,Prefer Mounted Volumes,Prune Jobs,Prune Files,Prune Volumes,RunScript,Run After Failed Job,Rerun Failed Levels,Spool Data,Spool Attributes,Where,Add Prefix,Add Suffix,Strip Prefix,RegexWhere,Replace,Prefix Links,Maximum Concurrent Jobs,Reschedule On Error,Reschedule Interval,Reschedule Times,Run,Priority,Allow Mixed Priority,Write Part After Job"
+%>
+
+
+<%= job_or_def %> {
+<% for parametre in parametres.split(',') do
+   parametre = parametre.strip
+   valeur = binding.eval(parametre.downcase.gsub(' ', '_'))
+-%>
+   <%= param_bacula(parametre, valeur) -%>
+<%
+end
+-%>
+<% if bacula_schedule != "" %>
+  Schedule =<%= bacula_schedule %>
+<% end %>
+<% if jobtype != "" %>
+  Type = <%= jobtype %>
+<% end %>
+<% if run_before_job != "" %>
+  Run Before Job = "<%= run_before_job %>"
+<% end %>
+<% if run_after_job != "" %>
+  Run After Job = "<%= run_after_job %>"
+<% end %>
+<% if client_run_before_job != "" %>
+  Client Run Before Job = "<%= client_run_before_job %>"
+<% end %>
+<% if client_run_after_job != "" %>
+  Client Run After Job = "<%= client_run_after_job %>"
+<% end %>
+}
+
+

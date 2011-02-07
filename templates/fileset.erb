@@ -1,0 +1,46 @@
+# File managed by Puppet
+
+<%
+def param_bacula(nom, valeur)
+  if valeur != "" then
+    return nom + "= \t\t\t" + valeur.to_s + "\n"
+  else
+    return ""
+  end
+end
+
+parametres = "Name,Ignore FileSet Changes,Enable VSS"
+%>
+
+
+FileSet {
+<% for parametre in parametres.split(',') do
+   parametre = parametre.strip
+   valeur = binding.eval(parametre.downcase.gsub(' ', '_')) -%>
+   <%= param_bacula(parametre, valeur) -%>
+<% end -%>
+<% for item in include do -%>
+  Include { 
+  <% for inc in item.split('!') do
+    if m = inc.match('^Options=(.*)') then -%>
+      Options {
+      <% for opt in m[1].split(',') do -%>
+        <%= opt %>
+      <% end -%>
+      }
+    <% else -%>
+      <%= inc %>
+    <% end
+  end -%>
+  }
+<% end -%>
+<% for item in exclude do -%>
+  Exclude { 
+  <% for excl in item.split('!') do -%>
+    <%= excl %>
+  <% end -%>
+  }
+<% end -%>
+}
+
+

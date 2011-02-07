@@ -1,0 +1,27 @@
+# File managed by Puppet
+
+<%
+def param_bacula(nom, valeur)
+  if valeur != "" then
+    return nom + "= \t\t\t" + valeur.to_s + "\n"
+  else
+    return ""
+  end
+end
+
+parametres = "Name,Maximum Volumes,Pool Type,Storage,Use Volume Once,Maximum Volume Jobs,Maximum Volume Files,Maximum Volume Bytes,Volume Use Duration,Catalog Files,AutoPrune,Volume Retention,RecyclePool,Recycle,Recycle Oldest Volume,Recycle Current Volume,Purge Oldest Volume,Cleaning Prefix,Label Format"
+%>
+
+
+Pool {
+<% for parametre in parametres.split(',') do
+   parametre = parametre.strip
+   valeur = binding.eval(parametre.downcase.gsub(' ', '_'))
+-%>
+   <%= param_bacula(parametre, valeur) -%>
+<%
+end
+-%>
+}
+
+
