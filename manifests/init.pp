@@ -138,7 +138,12 @@ class bacula-dir {
   }
 
   define console($password, $jobacl = '', $clientacl = '', $storageacl = '', $scheduleacl = '', $poolacl = '', $filesetacl = '', $catalogacl = '', $commandacl = '', $whereacl = '', $ensure = 'present') {
-   common::concatfilepart {
+    package {
+      'bacula-console':
+        ensure	=> installed;
+    }
+
+    common::concatfilepart {
       "console-$name":
         file	=> '/etc/bacula/bacula-dir.conf', 
         manage	=> true,
