@@ -49,6 +49,26 @@ class bacula-dir {
     }
   }
 
+  define postgresql_backup($client, $jobdefs, $pool, $bacula_schedule, $ensure = 'present') {
+    job {
+      "$name-postgres":
+        level                           => 'Full',
+        jobdefs                         => $jobdefs,
+        client				=> $client,
+        fileset				=> "$client-postgres",
+        bacula_schedule                 => $bacula_schedule,
+        client_run_before_job           => "sudo -u postgres /usr/local/sbin/backup_postgres_before.sh",
+        client_run_after_job            => "sudo -u postgres /usr/local/sbin/backup_postgres_after.sh",
+        priority                        => 17,
+        ensure                          => $ensure;
+    }
+
+    fileset {
+      "${client}-postgres":
+        include	=> ['File = /var/tmp/postgresql.dump!Options=signature=MD5'];
+    }
+  }
+
   define jobdefs($job_or_def = 'JobDefs', $enabled = "yes", $jobtype = '', $level = '', $accurate = '', $verify_job = '', $jobdefs = '', $bootstrap = '', $write_bootstrap = '', $client = '', $fileset = '', $messages = '', $pool = '', $full_backup_pool = '', $differential_backup_pool = '', $incremental_backup_pool = '', $bacula_schedule = '', $storage = '', $max_start_delay = '', $max_run_time = '', $incremental_max_run_time = '', $differential_max_wait_time = '', $max_run_shed_time = '', $max_wait_time = '', $max_full_age = '', $prefer_mounted_volumes = 'yes', $prune_jobs = '', $prune_files = '', $prune_volumes = '', $runscript = '', $run_before_job = '', $run_after_job = '', $run_after_failed_job = '', $client_run_before_job = '', $client_run_after_job = '', $rerun_failed_levels = '', $spool_data = '', $spool_attributes = '', $where = '', $add_prefix = '', $add_suffix = '', $strip_prefix = '', $regexwhere = '', $replace = '', $prefix_links = '', $maximum_concurrent_jobs = '', $reschedule_on_error = '', $reschedule_interval = '', $reschedule_times = '', $run = '', $priority = '', $allow_mixed_priority = '', $write_part_after_job = '', $ensure = 'present') {
    common::concatfilepart {
       "jobdefs-$name":
@@ -115,7 +135,16 @@ class bacula-dir {
     }
   }
 
-  define catalog($password, $db_name, $user, $db_socket = '', $db_address = '', $db_port = '', $ensure = 'present') {
+  define catalog($password, $db_name, $user, $db_socket = '', $db_address = '', $db_port = '5432', $ensure = 'present') {
+   # Write a .pgpass file in Bacula's homedir so that the catalog backup script may access the catalog
+   file {
+     '/var/lib/bacula/.pgpass':
+       owner	=> 'bacula',
+       group	=> 'bacula',
+       mode	=> 0400,
+       content	=> "localhost:${db_port}:${db_name}:${user}:${password}\n";
+   }
+
    common::concatfilepart {
       "catalog-$name":
         file	=> '/etc/bacula/bacula-dir.conf', 
@@ -238,6 +267,16 @@ class bacula-client {
       hasrestart	=> false,
       enable		=> true,
       ensure		=> running;
+  }
+
+  # PostgreSQL backup scripts
+  file {
+    '/usr/local/sbin/backup_postgres_before.sh':
+      source	=> 'puppet:///bacula/backup_postgres_before.sh',
+      mode	=> 0555;
+    '/usr/local/sbin/backup_postgres_after.sh':
+      source	=> 'puppet:///bacula/backup_postgres_after.sh',
+      mode	=> 0555;
   }
 
   define filedaemon($working_directory, $pid_directory, $heartbeat_interval = '', $maximum_concurrent_jobs = '', $fdaddresses = '', $fdport = '', $fdaddress = '', $fdsourceaddress = '', $sdconnecttimeout = '', $maximum_network_buffer_size = '', $heartbeat_interval = '', $ensure = 'present') {
