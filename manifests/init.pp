@@ -29,6 +29,19 @@ class bacula-dir {
         notify  => Service['bacula-director'];
     }
 
+    if $bacula_shorewall_rules {
+      # Allow Traffic in the firewall for the director
+      shorewall::rule {
+        "Allow access to director":
+          source            => 'all',
+          destination       => '$FW',
+          destinationport   => $dirport,
+          proto             => 'tcp',
+          action            => 'ACCEPT',
+          order             => '200';
+      }
+    }
+
     # Define virtually a console resource to access this director
     @bacula-console::console {
       $name:
@@ -218,6 +231,19 @@ class bacula-sd {
         ensure	=> $ensure,
         notify  => Service['bacula-sd'];
     }
+
+    if $bacula_shorewall_rules {
+      # Allow Traffic in the firewall for the storage daemon
+      shorewall::rule {
+        "Allow access to storage $name":
+          source            => 'all',
+          destination       => '$FW',
+          destinationport   => $sdport,
+          proto             => 'tcp',
+          action            => 'ACCEPT',
+          order             => '200';
+      } 
+    }
   }
 
   define sd-director($password, $monitor = '', $ensure = 'present') {
@@ -287,6 +313,19 @@ class bacula-client {
         content	=> template('bacula/fd-filedaemon.erb'),
         ensure	=> $ensure,
         notify		=> Service['bacula-fd'];
+    }
+
+    if $bacula_shorewall_rules {
+      # Allow Traffic in the firewall for the client
+      shorewall::rule {
+        "Allow access to bacula client $name":
+          source            => 'all',
+          destination       => '$FW',
+          destinationport   => $fdport,
+          proto             => 'tcp',
+          action            => 'ACCEPT',
+          order             => '200';
+      } 
     }
   }
 
