@@ -9,11 +9,12 @@ def param_bacula(nom, valeur)
   end
 end
 
-parametres = "Name,DIRport,QueryFile,Working Directory,Pid Directory,Scripts Directory,Maximum Concurrent Jobs,Password,Messages,DirAddress"
+parametres = "Name,DIRport,QueryFile,Working Directory,Pid Directory,Scripts Directory,Maximum Concurrent Jobs,Messages,DirAddress"
 %>
 
 
 Director {                           
+   Password=			<%= dir_password %>
 <% for parametre in parametres.split(',') do
    parametre = parametre.strip
    valeur = binding.eval(parametre.downcase.gsub(' ', '_'))

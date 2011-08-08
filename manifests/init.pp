@@ -19,7 +19,7 @@ class bacula-dir {
       ensure		=> running;
   }
 
-  define director($description = "Director $hostname", $password = "", $messages = "Daemon", $working_directory = "/var/lib/bacula", $pid_directory = "/var/run/bacula", $scripts_directory = "", $queryfile = "/etc/bacula/scripts/query.sql", $maximum_concurrent_jobs = "1", $diraddress = "127.0.0.1", $dirport = "9101", $ensure = "present") {
+  define director($description = "Director $hostname", $dir_password = "", $messages = "Daemon", $working_directory = "/var/lib/bacula", $pid_directory = "/var/run/bacula", $scripts_directory = "", $queryfile = "/etc/bacula/scripts/query.sql", $maximum_concurrent_jobs = "1", $diraddress = "127.0.0.1", $dirport = "9101", $ensure = "present") {
      common::concatfilepart {
       "director-$name":
         file	=> '/etc/bacula/bacula-dir.conf', 
@@ -47,7 +47,7 @@ class bacula-dir {
       $name:
         dirport		=> $dirport,
         address		=> $diraddress,
-        password	=> $password;
+        dir_password	=> $dir_password;
     }
   }
 
@@ -115,7 +115,7 @@ class bacula-dir {
     }
   }
 
-  define client($address, $fd_port = '', $catalog, $password, $file_retention = '', $job_retention = '', $autoprune = '', $maximum_concurrent_jobs = '', $priority = '', $ensure = 'present') {
+  define client($address, $fd_port = '', $catalog, $fd_password, $file_retention = '', $job_retention = '', $autoprune = '', $maximum_concurrent_jobs = '', $priority = '', $ensure = 'present') {
    common::concatfilepart {
       "client-$name":
         file	=> '/etc/bacula/bacula-dir.conf', 
@@ -126,7 +126,7 @@ class bacula-dir {
     }
   }
   
-  define storage($address, $sd_port = '', $password, $device, $media_type, $autochanger = '', $maximum_concurrent_jobs = '', $heartbeat_interval = '', $ensure = 'present') {
+  define storage($address, $sd_port = '', $sd_password, $device, $media_type, $autochanger = '', $maximum_concurrent_jobs = '', $heartbeat_interval = '', $ensure = 'present') {
    common::concatfilepart {
       "dir-storage-$name":
         file	=> '/etc/bacula/bacula-dir.conf', 
@@ -148,14 +148,14 @@ class bacula-dir {
     }
   }
 
-  define catalog($password, $db_name, $user, $db_socket = '', $db_address = '', $db_port = '5432', $ensure = 'present') {
+  define catalog($db_password, $db_name, $user, $db_socket = '', $db_address = '', $db_port = '5432', $ensure = 'present') {
    # Write a .pgpass file in Bacula's homedir so that the catalog backup script may access the catalog
    file {
      '/var/lib/bacula/.pgpass':
        owner	=> 'bacula',
        group	=> 'bacula',
        mode	=> 0400,
-       content	=> "localhost:${db_port}:${db_name}:${user}:${password}\n";
+       content	=> "localhost:${db_port}:${db_name}:${user}:${db_password}\n";
    }
 
    common::concatfilepart {
@@ -179,7 +179,7 @@ class bacula-dir {
     }
   }
 
-  define console($password, $jobacl = '', $clientacl = '', $storageacl = '', $scheduleacl = '', $poolacl = '', $filesetacl = '', $catalogacl = '', $commandacl = '', $whereacl = '', $ensure = 'present') {
+  define console($dir_password, $jobacl = '', $clientacl = '', $storageacl = '', $scheduleacl = '', $poolacl = '', $filesetacl = '', $catalogacl = '', $commandacl = '', $whereacl = '', $ensure = 'present') {
     package {
       'bacula-console':
         ensure	=> installed;
@@ -246,7 +246,7 @@ class bacula-sd {
     }
   }
 
-  define sd-director($password, $monitor = '', $ensure = 'present') {
+  define sd-director($sd_password, $monitor = '', $ensure = 'present') {
    common::concatfilepart {
       "sd-director-$name":
         file	=> '/etc/bacula/bacula-sd.conf', 
@@ -329,7 +329,7 @@ class bacula-client {
     }
   }
 
-  define fd-director($password, $monitor = '', $ensure = 'present') {
+  define fd-director($fd_password, $monitor = '', $ensure = 'present') {
      common::concatfilepart {
       "fd-director-$name":
         file	=> '/etc/bacula/bacula-fd.conf', 
@@ -353,7 +353,7 @@ class bacula-client {
 }
 
 class bacula-console {
-  define console($dirport=9101, $address, $password) {
+  define console($dirport=9101, $address, $dir_password) {
     common::concatfilepart {
       "bconsole-$name":
         file	=> '/etc/bacula/bconsole.conf',
