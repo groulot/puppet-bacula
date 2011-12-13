@@ -298,10 +298,10 @@ class bacula-client {
   # PostgreSQL backup scripts
   file {
     '/usr/local/sbin/backup_postgres_before.sh':
-      source	=> 'puppet:///bacula/backup_postgres_before.sh',
+      source	=> 'puppet:///modules/bacula/backup_postgres_before.sh',
       mode	=> 0555;
     '/usr/local/sbin/backup_postgres_after.sh':
-      source	=> 'puppet:///bacula/backup_postgres_after.sh',
+      source	=> 'puppet:///modules/bacula/backup_postgres_after.sh',
       mode	=> 0555;
   }
 
