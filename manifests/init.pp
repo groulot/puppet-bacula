@@ -222,7 +222,7 @@ class bacula-sd {
       ensure		=> running;
   }
   
-  define storage($working_directory, $pid_directory, $heartbeat_interval = '', $client_connect_wait = '', $maximum_concurrent_jobs = '', $sdport = '', $sdaddress = '', $ensure = 'present') {
+  define storage($working_directory, $pid_directory, $heartbeat_interval = '', $client_connect_wait = '', $maximum_concurrent_jobs = '', $sdport = '', $sdaddress = '', $sdaddresses = '', $ensure = 'present') {
    common::concatfilepart {
       "sd-storage-$name":
         file	=> '/etc/bacula/bacula-sd.conf', 
